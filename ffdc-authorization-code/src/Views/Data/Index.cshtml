@@ -1,0 +1,93 @@
+﻿@*@model ffdc_b2e_sample.Models.FxSpotSummaryList*@
+@{
+    ViewData["Title"] = "Index";
+}
+<div style="width:20px"><b>@Html.ActionLink("Signout", "Signout", "Login")</b></div>
+<p></p>
+<div style="width:50%"><b>List Forex Spot Trades</b></div>
+<table class="table table-bordered table-responsive table-hover" border="1" id="serverTable">
+    <thead>
+        <tr>
+            <th>
+                Id
+            </th>
+            <th>
+                Currency Pair
+            </th>
+            <th>
+                Direction
+            </th>
+            <th>
+                Domestic Amount
+            </th>
+            <th>
+                Foreign Amount
+            </th>
+           
+            <th>
+                Exchange Rate
+            </th>
+            <th>
+                Legal EntityId
+            </th>
+            <th>
+                Counter PartyId
+            </th>
+            <th>
+                Trade Date
+            </th>
+            <th>
+                Settlement Date
+            </th>
+            <th>
+                Trader Id
+            </th>
+
+        </tr>
+    </thead>
+   
+</table>
+
+<script type="text/javascript" src="/Scripts/jquery-3.4.0.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
+
+
+<script>
+    $(document).ready(function () {
+
+        // Set up the DataTable grid
+        $("#serverTable").DataTable({
+            "processing": true, // for show progress bar
+            "serverSide": false, // for process server side
+            "filter": false, // this is for disable filter (search box)
+            "orderMulti": false,
+            "paging": true,
+            "pagingType": "full_numbers",
+            "pageLength": 10,
+            "ajax": {
+                'url': '/Data/LoadTable',
+                'type': 'GET',
+                'datatype': 'json',
+                'data': function (data) {
+                    return data;
+                }
+
+            },
+            "columns": [
+                { "data": "id", "autoWidth": true },
+                { "data": "currencyPair", "autoWidth": true },
+                { "data": "direction", "autoWidth": true },
+                { "data": "domesticAmount.amount", "autoWidth": true },
+                { "data": "foreignAmount.amount", "autoWidth": true },
+                { "data": "exchangeRate", "autoWidth": true },
+                { "data": "legalEntityId", "autoWidth": true },
+                { "data": "counterpartyId", "autoWidth": true },
+                { "data": "tradeDate", "autoWidth": true },
+                { "data": "settlementDate", "autoWidth": true },
+                { "data": "traderId", "autoWidth": true }
+            ]
+        });
+
+    });
+</script>

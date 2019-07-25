@@ -1,0 +1,25 @@
+{
+  "finastra": {
+    "oauth2": {
+      "baseUrl": "https://api.fusionfabric.cloud",
+      "clientId": "<%YOUR-CLIENT-ID%>",
+      "clientSecret": "<%YOUR-SECRET-KEY%>",
+      "grantType": "client_credentials",
+      "accessTokenEndpoint": "/login/v1/sandbox/oidc/token",
+      "scope": "openid"
+    }
+  },
+  "Logging": {
+    "IncludeScopes": false,
+    "Debug": {
+      "LogLevel": {
+        "Default": "Warning"
+      }
+    },
+    "Console": {
+      "LogLevel": {
+        "Default": "Warning"
+      }
+    }
+  }
+}
