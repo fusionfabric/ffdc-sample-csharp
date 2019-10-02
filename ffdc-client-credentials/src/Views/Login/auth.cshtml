@@ -1,0 +1,22 @@
+﻿@model string
+@{
+    ViewData["Title"] = "auth";
+    Layout = "~/Views/_Layout.cshtml";
+}
+
+<main class="main">
+    <div>
+        <p><label>You acquired the following access token:</label></p>
+        <textarea id="textToken" rows="10" cols="100" wrap="soft">@Model</textarea>
+        <p></p>
+        <button type="button" onclick="myFunction()">Copy to clipboard</button>
+        <script>
+        function myFunction() {
+          document.getElementById("textToken").select()
+          document.execCommand('copy')
+        }
+        </script>
+    </div>
+</main>
+
+

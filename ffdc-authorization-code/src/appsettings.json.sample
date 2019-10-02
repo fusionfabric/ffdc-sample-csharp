@@ -1,14 +1,17 @@
 {
-  "finastra":{
+  "finastra": {
     "oauth2": {
+      "strong": false,
       "baseUrl": "https://api.fusionfabric.cloud",
+      "baseLogin": "https://api.fusionfabric.cloud/login/v1",
       "clientId": "<%YOUR-CLIENT-ID%>",
       "clientSecret": "<%YOUR-SECRET-KEY%>",
+      "grantType": "authorization_code",
       "accessTokenEndpoint": "/login/v1/sandbox/oidc/token",
       "authorizationEndpoint": "/login/v1/sandbox/oidc/authorize",
-      "redirectUri": "https://localhost:44307/login/oauth2/code/finastra",
+      "redirectUri": "http://localhost:4000/callback",
       "scope": "openid",
-      "grantType": "authorization_code"
+      "KeyID": "key"
     }
   },
   "Logging": {
