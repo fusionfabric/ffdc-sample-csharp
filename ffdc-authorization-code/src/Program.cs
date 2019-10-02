@@ -12,7 +12,6 @@ namespace ffdc_authorization_code
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
-                .UseUrls("https://localhost:44307");
+                .UseStartup<Startup>();
     }
 }

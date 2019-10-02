@@ -4,8 +4,15 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Configuration;
-
+using System.Security.Cryptography;
+using System.IO;
 using ffdc_authorization_code.Models;
+
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle.Security;
+using Jose;
 
 namespace ffdc_authorization_code.Services
 {
@@ -13,11 +20,11 @@ namespace ffdc_authorization_code.Services
     {
         private HttpClient _httpClient;
         private IConfiguration _configuration;
-        
+
         public FFDCClientService(HttpClient httpClient, IConfiguration configuration)
         {
             _configuration = configuration;
-            
+
             _httpClient = httpClient;
             _httpClient.BaseAddress = new Uri(_configuration.GetValue<string>("finastra:oauth2:baseUrl"));
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -28,30 +35,44 @@ namespace ffdc_authorization_code.Services
         /// </summary>
         /// <param name="code"></param>
         /// <returns></returns>
-        public string GenerateToken(string code)
+        public string GenerateToken(string code, bool isStrong)
         {
             var clientApplication = new Dictionary<string, string>
             {
                 ["client_id"] = _configuration.GetValue<string>("finastra:oauth2:clientId"),
-                ["client_secret"] = _configuration.GetValue<string>("finastra:oauth2:clientSecret"),
                 ["grant_type"] = _configuration.GetValue<string>("finastra:oauth2:grantType"),
                 ["code"] = code,
-                ["redirect_uri"] = _configuration.GetValue<string>("finastra:oauth2:redirectUri"),
-                ["scope"] = "openid"
+                ["redirect_uri"] = _configuration.GetValue<string>("finastra:oauth2:redirectUri")
+
             };
 
-            FormUrlEncodedContent content = new FormUrlEncodedContent(clientApplication);
-
-            HttpResponseMessage response = _httpClient.PostAsync(_configuration.GetValue<string>("finastra:oauth2:accessTokenEndpoint"), content).Result;
-            string responseContent = response.Content.ReadAsStringAsync().Result;
-
-            JwtToken token = JsonConvert.DeserializeObject<JwtToken>(responseContent);
-
-            if (token == null || token.access_token == null)
+            if (isStrong)
             {
-                return null;
+                string token = CreateStrongToken();
+
+                clientApplication.Add("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer");
+                clientApplication.Add("client_assertion", token);
+                FormUrlEncodedContent content = new FormUrlEncodedContent(clientApplication);
+
+                HttpResponseMessage response = _httpClient.PostAsync(_configuration.GetValue<string>("finastra:oauth2:accessTokenEndpoint"), content).Result;
+                string responseContent = response.Content.ReadAsStringAsync().Result;
+
+                JwtToken jwtToken = JsonConvert.DeserializeObject<JwtToken>(responseContent);
+
+                return jwtToken?.access_token;
             }
-            return token.access_token;
+            else
+            {
+                clientApplication.Add("client_secret", _configuration.GetValue<string>("finastra:oauth2:clientSecret"));
+                FormUrlEncodedContent content = new FormUrlEncodedContent(clientApplication);
+
+                HttpResponseMessage response = _httpClient.PostAsync(_configuration.GetValue<string>("finastra:oauth2:accessTokenEndpoint"), content).Result;
+                string responseContent = response.Content.ReadAsStringAsync().Result;
+
+                JwtToken token = JsonConvert.DeserializeObject<JwtToken>(responseContent);
+
+                return token?.access_token;
+            }
         }
 
         /// <summary>
@@ -71,21 +92,83 @@ namespace ffdc_authorization_code.Services
 
             return url;
         }
-        
+
         /// <summary>
         /// Get list of trades from FFDC trade capture FX spot API by JWT token authentication
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
-        public FxSpotSummaryList GetFxSpotTrades(string token)
+        public object GetResults(string token,out int responseCode)
         {
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+           _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            HttpResponseMessage refDataResponse = _httpClient.GetAsync("/capital-market/trade-capture/fx/spot/v1/trades").Result;
-            string tradeSummary = refDataResponse.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage refDataResponse = _httpClient.GetAsync("/capital-market/trade-capture/static-data/v1/reference-sources?applicableEntities=legal-entities").Result;
+            if (refDataResponse.IsSuccessStatusCode)
+            {
+                responseCode = (int)refDataResponse.StatusCode;
+                string tradeSummary = refDataResponse.Content.ReadAsStringAsync().Result;
 
-            FxSpotSummaryList tradeSummaryList = JsonConvert.DeserializeObject<FxSpotSummaryList>(tradeSummary);
-            return tradeSummaryList;
+                TradeCaptureStaticDataList staticData = JsonConvert.DeserializeObject<TradeCaptureStaticDataList>(tradeSummary);
+                return staticData;
+            }
+            else
+            {
+                responseCode = (int)refDataResponse.StatusCode;
+                return refDataResponse.StatusCode;
+            }
+        }
+
+        /// <summary>
+        /// Read the config value strong
+        /// If it is true then API uses JWK token for authentication
+        /// </summary>
+        /// <returns></returns>
+        public bool GetIsStrongValue()
+        {
+            return _configuration.GetValue<bool>("finastra:oauth2:strong");
+        }
+
+        /// <summary>
+        /// This creates JWT Token and signin using private key,so it can be
+        /// used to generate access token via client assertion
+        /// </summary>
+        /// <returns></returns>
+        public string CreateStrongToken()
+        {
+            string clientId = _configuration.GetValue<string>("finastra:oauth2:clientId");
+            string baseLogin = _configuration.GetValue<string>("finastra:oauth2:baseLogin");
+            string privateKey = File.ReadAllText("./Keys/private.pem");
+            var rsa = new RSACryptoServiceProvider(1024);
+
+            string keyID = _configuration.GetValue<string>("finastra:oauth2:KeyID");
+            TimeSpan span = ((DateTime.Now).AddMinutes(30)) - new DateTime(1970, 1, 1, 0, 0, 0, 0).ToLocalTime();
+            AsymmetricCipherKeyPair keyPair;
+            using (var sr = new StringReader(privateKey))
+            {
+                var pr = new PemReader(sr);
+                keyPair = (AsymmetricCipherKeyPair)pr.ReadObject();
+            }
+            var payLoad = new Dictionary<string, object>
+            {
+                {"jti",Guid.NewGuid().ToString() },
+                { "iss", clientId},
+                { "exp", span.TotalSeconds },
+                { "aud", baseLogin},
+                { "sub", clientId},
+            };
+            var header = new Dictionary<string, object>
+            {
+                { "kid", keyID},
+                { "typ", "JWT"}
+            };
+
+            RSAParameters rsaParameters = DotNetUtilities.ToRSAParameters((RsaPrivateCrtKeyParameters)keyPair.Private);
+            rsa.ImportParameters(rsaParameters);
+
+            string jwtToken = JWT.Encode(payLoad, rsa, JwsAlgorithm.RS256, header);
+
+            return jwtToken;
+
         }
     }
 }

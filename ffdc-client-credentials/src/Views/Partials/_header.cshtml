@@ -1,0 +1,34 @@
+﻿@model bool
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <span class="navbar-brand mb-0 h1">Finastra C# Client Credentials Code Sample</span>
+</nav>
+
+<h6>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        @if (Model)
+        {
+            <p>JSON Web Key Authentication</p>
+        }
+        else
+        {
+            <p>Secret Key Authentication</p>
+
+        }
+    </nav>
+</h6>
+
+<div class="btn-toolbar" role="toolbar">
+    <form action="login">
+        <button type="submit" class="btn btn-primary">Acquire Access Token</button>
+    </form>
+
+    <form action="results">
+        <button type="submit" class="btn btn-secondary">Get Data</button>
+    </form>
+
+    <form action="logout">
+        <button type="submit" class="btn btn-danger">Remove Access Token</button>
+    </form>
+</div>
+
+<hr>

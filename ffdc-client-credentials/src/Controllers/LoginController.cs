@@ -1,9 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
-using ffdc_authorization_code.Services;
+using ffdc_client_credentials.Services;
+using Microsoft.AspNetCore.Http;
 
-namespace ffdc_authorization_code.Controllers
+namespace ffdc_.Controllers
 {
     public class LoginController : Controller
     {
@@ -11,30 +15,24 @@ namespace ffdc_authorization_code.Controllers
 
         public LoginController(FFDCClientService ffdcClientService)
         {
+           
             _ffdcClientService = ffdcClientService;
         }
 
         [Route("login")]
         public IActionResult Index()
         {
-            ViewBag.isStrong = _ffdcClientService.GetIsStrongValue();
-            string authCodeurl = _ffdcClientService.GetFFDCAuthCodeUri();
-            return Redirect(authCodeurl);
-        }
-
-        [Route("callback")]
-        public IActionResult GenerateAccessToken(string code)
-        {
-            bool strong = _ffdcClientService.GetIsStrongValue();
-            ViewBag.isStrong = strong;
-            string token = _ffdcClientService.GenerateToken(code, strong);
+            var isStrong = _ffdcClientService.GetIsStrongValue();
+            ViewBag.isStrong = isStrong;
+            string token = _ffdcClientService.GenerateToken(isStrong);
             if (!string.IsNullOrEmpty(token))
             {
                 HttpContext.Session.SetString("token", token);
                 return View("auth", token);
             }
-        
+
             return View("error", "Unauthorized!");
+          
         }
 
         [Route("logout")]
