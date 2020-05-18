@@ -1,0 +1,8 @@
+{
+  "kty": "RSA",
+  "n": "7uXfWEIPQhnC7j7uElv7UhqMFzj4SpSRHER5tuIbyaiuELsBmajZ164lFCaz1CpPLdQYhdUzOjIneqz7sp57hLSyssKSm-6-2PYX6ctAbkNiET_Lglic3qmoYoavFTuf5Uu31mniAd16T2eHHw8VUj8V0a3cx7x6K3_0CS5EDN-_nfBBBF08-MPTmf8e-5tDKaEZA_SanKrdzk-ena6ZpQbZv_hzJf1Vvcw-G17_Sk-CLAuMoY8_b9HOSxx3jLWz0YVr3Zlv-IWs00Q7rfpBPxsYPfUwlXtAsLELuFylV56TaCM49_WBmiFWpElu67UwfRFPY_UvRDqeOgY3-o2jiw",
+  "e": "AQAB",
+  "alg": "RS256",
+  "kid": "yourApp_key_should_match_value_in_settings",
+  "use": "sig"
+}
