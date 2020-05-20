@@ -20,12 +20,12 @@ To run this sample you need a recent installation of .NET SDK. To find out more 
       + `ClientId` - the client ID of the corresponding API channel type.
       + `ClientSecret` - the secret key of the corresponding API channel type.  
    > You find these values in the application details page of the application that you created at step 1. For more information about how to generate the secrets, see [FusionCreator Documentation](https://developer.fusionfabric.cloud/documentation/creator-apps#credentials-by-api-channel).  
-   + `Finastra.Oauth2Configuration.ClientAuthenticationMethod`: enter `client_secret` to enable the standard OAuth2 authorization flow.  For more details, see [FusionCreator Documentation](https://developer.ffdcdev.fusionfabric.cloud/documentation/oauth2-grants).  
+   + `Finastra.Oauth2Configuration.ClientAuthenticationMethod`: enter `client_secret` to enable the standard OAuth2 authorization flow.  For more details, see [FusionCreator Documentation](https://developer.fusionfabric.cloud/documentation/oauth2-grants).  
    > The `TokenEndpoint`, `AuthorityEndpoint`, and `Issuer` values provided by the [Discovery service](https://developer.fusionfabric.cloud/documentation/oauth2-grants#discovery-service) of FusionCreator.  
 4. (Optional) If you want to use private key authentication, instead of the standard authentication based on secret value, follow the steps from the next section - [Private Key Configuration](#private-key-configuration), to sign and upload a JSON Web Key to your application, and save the private RSA key in **src/Keys/private.der**. Edit `appsettings.Development.json` as follows:
    + Set `Finastra.Oauth2Configuration.ClientAuthenticationMethod` to `private_key_jwt`. 
    + Make sure `JwkKeyId` of either `Finastra.Oauth2Configuration.B2B` or `Finastra.Oauth2Configuration.B2C`, or both, is set to the key ID - `kid` - of the JWK you uploaded to Developer Portal.
-   > To read more about private key authentication on FusionCreator, see the [documentation](https://developer.ffdcdev.fusionfabric.cloud/documentation/oauth2-grants#jwk-auth). 
+   > To read more about private key authentication on FusionCreator, see the [documentation](https://developer.fusionfabric.cloud/documentation/oauth2-grants#jwk-auth). 
 5. Open a Command Prompt or a Terminal in this directory and run the following commands:
    ```
    dotnet build
