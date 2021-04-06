@@ -60,3 +60,7 @@ openssl rsa -inform PEM -in private.key -outform DER -out private.der
 # License
 
 This sample client application is released under the MIT License. See [LICENSE](LICENSE) for details.
+
+
+![example workflow](https://github.com/fusionfabric/ffdc-sample-csharp/actions/workflows/superlinter.yml/badge.svg) [![FOSSA Status](https://app.fossa.com/api/projects/custom%2B24247%2Fgithub.com%2Ffusionfabric%2Fffdc-sample-csharp.svg?type=shield)](https://app.fossa.com/projects/custom%2B24247%2Fgithub.com%2Ffusionfabric%2Fffdc-sample-csharp?ref=badge_shield) [![PyPI license](https://img.shields.io/pypi/l/ansicolortags.svg)](https://pypi.python.org/pypi/ansicolortags/) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+
